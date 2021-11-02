@@ -1,25 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, TouchableOpacity, View, Text, StyleSheet, FlatListProps, TextInput} from 'react-native';
+import { Image, TouchableOpacity, View, StyleSheet, TextInput} from 'react-native';
 
 import Icon from 'react-native-vector-icons/Feather';
 import trashIcon from '../assets/icons/trash/trash.png';
+import xIcon from'../assets/icons/close/close.png';
+import pencilIcon from '../assets/icons/edit/pencil.png';
+import {Task, TasksListProps} from './TasksList';
 
-export function TaskItem(){
+interface ItemProps{
+  item: Task,
+  index: number,
+  listProps: TasksListProps
+}
+
+
+export function TaskItem({item, index, listProps}: ItemProps){
   const textInputRef = useRef<TextInput>(null)
 
   const [editingTitle, setEditingTitle] = useState(false);
-  const[itemTitle, setItemTitle] = useState(task.title);
+  const[newItemTitle, setNewItemTitle] = useState(item.title);
 
   function handleStartEditing(){
     setEditingTitle(true);
   }
 
   function handleCancelEditing(){
-    setItemTitle(task.title);
+    setNewItemTitle(item.title);
     setEditingTitle(false);
   }
   function handleSubmitEditing(){
-    editTask(task.id, itemTitle);
+    listProps.editTask(item.id, newItemTitle);
     setEditingTitle(false);
   }
 
@@ -36,12 +46,12 @@ export function TaskItem(){
     return(
         <>
         <View>
-              <TouchableOpacity
+               <TouchableOpacity
                 testID={`button-${index}`}
                 activeOpacity={0.7}
                 style={styles.taskButton}
                 //TODO - use onPress (toggle task) prop
-                onPress ={() =>toggleTaskDone(item.id)}
+                onPress ={() =>listProps.toggleTaskDone(item.id)}
               >
                 <View 
                   testID={`marker-${index}`}
@@ -60,58 +70,58 @@ export function TaskItem(){
                 <TextInput 
                   //TODO - use style prop
                   style={ item.done ? styles.taskTextDone : styles.taskText}
-                  value= {itemTitle}
-                  onChangeText={setItemTitle}
+                  onChangeText={setNewItemTitle}
                   editable= {editingTitle}
                   onSubmitEditing = {handleSubmitEditing}
                   ref={textInputRef}
-                >
-                  {item.title}
-                </TextInput>
-              </TouchableOpacity>
+                  value= {newItemTitle}
+                />
+                 
+                
+              </TouchableOpacity> 
             </View>
-
-            <TouchableOpacity
-              
-              testID={`trash-${index}`}
-              style={{ paddingHorizontal: 24 }}
-              //TODO - use onPress (remove task) prop
-              onPress={()=> removeTask(item.id)}
-            >
-              <View>
+           
+              <View
+                style={{flexDirection: 'row'}}
+              >
                 {
                   editingTitle?
-                  <TouchableOpacity onPress={handleCancelEditing}>
+                  <TouchableOpacity 
+                    onPress={handleCancelEditing}
+                    style ={{paddingHorizontal: 17, marginVertical:4}}
+                  >
                     <Image source={xIcon} />
                   </TouchableOpacity>
                   :
-                  <TouchableOpacity onPress= {handleStartEditing}>
+                  <TouchableOpacity 
+                    onPress= {handleStartEditing}
+                    style ={{paddingHorizontal: 13}}
+                  >
                     <Image source={pencilIcon} />
                   </TouchableOpacity>
 
                 }
 
-                  <View style={{width: 1, height: 24, backgroundColor: 'rgba(196, 196, 196, 0.24)'}}/>
+              <View style={{width: 1, height: 24, backgroundColor: 'rgba(196, 196, 196, 0.24)'}}/>
 
+                <TouchableOpacity
+                  testID={`trash-${index}`} 
+                  onPress= {() => listProps.removeTask(item.id)}
+                  disabled = {editingTitle}
+                  style ={{paddingHorizontal: 13, opacity:editingTitle? 0.2 : 1 }}
+                >
+                  <Image source={trashIcon} />
+                </TouchableOpacity>
 
-                  <TouchableOpacity 
-                    onPress= {handleRemoveTask}
-                    disabled = {editingTitle}
-                    style ={{opacity:editingTitle? 0.2 : 1 }}
-                  >
-                    <Image source={trashIcon} />
-                  </TouchableOpacity>
               </View>
-            </TouchableOpacity>
             </>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
     taskButton: {
       flex: 1,
       paddingHorizontal: 24,
-      paddingVertical: 15,
       marginBottom: 4,
       borderRadius: 4,
       flexDirection: 'row',

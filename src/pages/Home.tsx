@@ -78,7 +78,7 @@ export function Home() {
         tasks={tasks} 
         toggleTaskDone={handleToggleTaskDone}
         removeTask={handleRemoveTask} 
-        editTask
+        editTask = {handleEditTask}
       />
     </View>
   )
